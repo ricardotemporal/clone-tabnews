@@ -6,25 +6,35 @@ beforeAll(async () => {
   await database.query("drop schema public cascade; create schema public;");
 });
 
-test("POST para /api/v1/migrations deve retornar 200", async () => {
-  const responseBefore = await fetch(
-    "http://localhost:3000/api/v1/migrations",
-    {
-      method: "POST",
-    },
-  );
-  expect(responseBefore.status).toBe(201);
+describe("POST /api/v1/migrations", () => {
+  describe("Usuário anônimo", () => {
+    describe("Roda as migrações pendentes", () => {
+      test("Pela primeira vez", async () => {
+        const responseBefore = await fetch(
+          "http://localhost:3000/api/v1/migrations",
+          {
+            method: "POST",
+          },
+        );
+        expect(responseBefore.status).toBe(201);
 
-  const responseBeforeBody = await responseBefore.json();
-  expect(Array.isArray(responseBeforeBody)).toBe(true);
-  expect(responseBeforeBody.length).toBeGreaterThan(0);
+        const responseBeforeBody = await responseBefore.json();
+        expect(Array.isArray(responseBeforeBody)).toBe(true);
+        expect(responseBeforeBody.length).toBeGreaterThan(0);
+      });
+      test("Pela segunda vez", async () => {
+        const responseAfter = await fetch(
+          "http://localhost:3000/api/v1/migrations",
+          {
+            method: "POST",
+          },
+        );
+        expect(responseAfter.status).toBe(200);
 
-  const responseAfter = await fetch("http://localhost:3000/api/v1/migrations", {
-    method: "POST",
+        const responseAfterBody = await responseAfter.json();
+        expect(Array.isArray(responseAfterBody)).toBe(true);
+        expect(responseAfterBody.length).toBe(0);
+      });
+    });
   });
-  expect(responseAfter.status).toBe(200);
-
-  const responseAfterBody = await responseAfter.json();
-  expect(Array.isArray(responseAfterBody)).toBe(true);
-  expect(responseAfterBody.length).toBe(0);
 });
