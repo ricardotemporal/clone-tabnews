@@ -2,7 +2,13 @@ import bcryptjs from "bcryptjs";
 
 async function hash(password) {
   const rounds = getNumberOfRounds();
-  return await bcryptjs.hash(password, rounds);
+  const pepperedPassword = addPepper(password);
+  return await bcryptjs.hash(pepperedPassword, rounds);
+}
+
+function addPepper(password) {
+  const pepper = process.env.PEPPER;
+  return password + pepper;
 }
 
 function getNumberOfRounds() {
@@ -10,7 +16,8 @@ function getNumberOfRounds() {
 }
 
 async function compare(providedPassword, storedPassword) {
-  return await bcryptjs.compare(providedPassword, storedPassword);
+  const pepperedPassword = addPepper(providedPassword);
+  return await bcryptjs.compare(pepperedPassword, storedPassword);
 }
 
 const password = {
